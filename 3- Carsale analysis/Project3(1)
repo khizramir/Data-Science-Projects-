@@ -1,0 +1,2321 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Analyzing Used Car Listings on eBay\n",
+    "\n",
+    "In this project, we'll work with a dataset of used cars from German eBay website."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The data dictionary is as follows:\n",
+    "\n",
+    "* `dateCrawled` - When this ad was first crawled.\n",
+    "* `name` - Name of the car.\n",
+    "* `seller` - Whether the seller is private or a dealer.\n",
+    "* `offerType` - The type of listing\n",
+    "* `price` - The price on the ad to sell the car.\n",
+    "* `abtest` - Whether the listing is included in an A/B test.\n",
+    "* `vehicleType` - The vehicle Type.\n",
+    "* `yearOfRegistration` - The year in which the car was first registered.\n",
+    "* `gearbox` - The transmission type.\n",
+    "* `powerPS` - The power of the car in PS.\n",
+    "* `model` - The car model name.\n",
+    "* `kilometer` - How many kilometers the car has driven.\n",
+    "* `monthOfRegistration` - The month in which the car was first registered.\n",
+    "* `fuelType` - What type of fuel the car uses.\n",
+    "* `brand` - The brand of the car.\n",
+    "* `notRepairedDamage` - If the car has a damage which is not yet repaired.\n",
+    "* `dateCreated` - The date on which the eBay listing was created.\n",
+    "* `nrOfPictures` - The number of pictures in the ad.\n",
+    "* `postalCode` - The postal code for the location of the vehicle.\n",
+    "* `lastSeenOnline` - When the crawler saw this ad last online."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The aim of this project is to analyze the used car listings"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>dateCrawled</th>\n",
+       "      <th>name</th>\n",
+       "      <th>seller</th>\n",
+       "      <th>offerType</th>\n",
+       "      <th>price</th>\n",
+       "      <th>abtest</th>\n",
+       "      <th>vehicleType</th>\n",
+       "      <th>yearOfRegistration</th>\n",
+       "      <th>gearbox</th>\n",
+       "      <th>powerPS</th>\n",
+       "      <th>model</th>\n",
+       "      <th>odometer</th>\n",
+       "      <th>monthOfRegistration</th>\n",
+       "      <th>fuelType</th>\n",
+       "      <th>brand</th>\n",
+       "      <th>notRepairedDamage</th>\n",
+       "      <th>dateCreated</th>\n",
+       "      <th>nrOfPictures</th>\n",
+       "      <th>postalCode</th>\n",
+       "      <th>lastSeen</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>2016-03-26 17:47:46</td>\n",
+       "      <td>Peugeot_807_160_NAVTECH_ON_BOARD</td>\n",
+       "      <td>privat</td>\n",
+       "      <td>Angebot</td>\n",
+       "      <td>$5,000</td>\n",
+       "      <td>control</td>\n",
+       "      <td>bus</td>\n",
+       "      <td>2004</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>158</td>\n",
+       "      <td>andere</td>\n",
+       "      <td>150,000km</td>\n",
+       "      <td>3</td>\n",
+       "      <td>lpg</td>\n",
+       "      <td>peugeot</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-03-26 00:00:00</td>\n",
+       "      <td>0</td>\n",
+       "      <td>79588</td>\n",
+       "      <td>2016-04-06 06:45:54</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2016-04-04 13:38:56</td>\n",
+       "      <td>BMW_740i_4_4_Liter_HAMANN_UMBAU_Mega_Optik</td>\n",
+       "      <td>privat</td>\n",
+       "      <td>Angebot</td>\n",
+       "      <td>$8,500</td>\n",
+       "      <td>control</td>\n",
+       "      <td>limousine</td>\n",
+       "      <td>1997</td>\n",
+       "      <td>automatik</td>\n",
+       "      <td>286</td>\n",
+       "      <td>7er</td>\n",
+       "      <td>150,000km</td>\n",
+       "      <td>6</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>bmw</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-04-04 00:00:00</td>\n",
+       "      <td>0</td>\n",
+       "      <td>71034</td>\n",
+       "      <td>2016-04-06 14:45:08</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>2016-03-26 18:57:24</td>\n",
+       "      <td>Volkswagen_Golf_1.6_United</td>\n",
+       "      <td>privat</td>\n",
+       "      <td>Angebot</td>\n",
+       "      <td>$8,990</td>\n",
+       "      <td>test</td>\n",
+       "      <td>limousine</td>\n",
+       "      <td>2009</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>102</td>\n",
+       "      <td>golf</td>\n",
+       "      <td>70,000km</td>\n",
+       "      <td>7</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>volkswagen</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-03-26 00:00:00</td>\n",
+       "      <td>0</td>\n",
+       "      <td>35394</td>\n",
+       "      <td>2016-04-06 20:15:37</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>2016-03-12 16:58:10</td>\n",
+       "      <td>Smart_smart_fortwo_coupe_softouch/F1/Klima/Pan...</td>\n",
+       "      <td>privat</td>\n",
+       "      <td>Angebot</td>\n",
+       "      <td>$4,350</td>\n",
+       "      <td>control</td>\n",
+       "      <td>kleinwagen</td>\n",
+       "      <td>2007</td>\n",
+       "      <td>automatik</td>\n",
+       "      <td>71</td>\n",
+       "      <td>fortwo</td>\n",
+       "      <td>70,000km</td>\n",
+       "      <td>6</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>smart</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-03-12 00:00:00</td>\n",
+       "      <td>0</td>\n",
+       "      <td>33729</td>\n",
+       "      <td>2016-03-15 03:16:28</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>2016-04-01 14:38:50</td>\n",
+       "      <td>Ford_Focus_1_6_Benzin_TÜV_neu_ist_sehr_gepfleg...</td>\n",
+       "      <td>privat</td>\n",
+       "      <td>Angebot</td>\n",
+       "      <td>$1,350</td>\n",
+       "      <td>test</td>\n",
+       "      <td>kombi</td>\n",
+       "      <td>2003</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>0</td>\n",
+       "      <td>focus</td>\n",
+       "      <td>150,000km</td>\n",
+       "      <td>7</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>ford</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-04-01 00:00:00</td>\n",
+       "      <td>0</td>\n",
+       "      <td>39218</td>\n",
+       "      <td>2016-04-01 14:38:50</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "           dateCrawled                                               name  \\\n",
+       "0  2016-03-26 17:47:46                   Peugeot_807_160_NAVTECH_ON_BOARD   \n",
+       "1  2016-04-04 13:38:56         BMW_740i_4_4_Liter_HAMANN_UMBAU_Mega_Optik   \n",
+       "2  2016-03-26 18:57:24                         Volkswagen_Golf_1.6_United   \n",
+       "3  2016-03-12 16:58:10  Smart_smart_fortwo_coupe_softouch/F1/Klima/Pan...   \n",
+       "4  2016-04-01 14:38:50  Ford_Focus_1_6_Benzin_TÜV_neu_ist_sehr_gepfleg...   \n",
+       "\n",
+       "   seller offerType   price   abtest vehicleType  yearOfRegistration  \\\n",
+       "0  privat   Angebot  $5,000  control         bus                2004   \n",
+       "1  privat   Angebot  $8,500  control   limousine                1997   \n",
+       "2  privat   Angebot  $8,990     test   limousine                2009   \n",
+       "3  privat   Angebot  $4,350  control  kleinwagen                2007   \n",
+       "4  privat   Angebot  $1,350     test       kombi                2003   \n",
+       "\n",
+       "     gearbox  powerPS   model   odometer  monthOfRegistration fuelType  \\\n",
+       "0    manuell      158  andere  150,000km                    3      lpg   \n",
+       "1  automatik      286     7er  150,000km                    6   benzin   \n",
+       "2    manuell      102    golf   70,000km                    7   benzin   \n",
+       "3  automatik       71  fortwo   70,000km                    6   benzin   \n",
+       "4    manuell        0   focus  150,000km                    7   benzin   \n",
+       "\n",
+       "        brand notRepairedDamage          dateCreated  nrOfPictures  \\\n",
+       "0     peugeot              nein  2016-03-26 00:00:00             0   \n",
+       "1         bmw              nein  2016-04-04 00:00:00             0   \n",
+       "2  volkswagen              nein  2016-03-26 00:00:00             0   \n",
+       "3       smart              nein  2016-03-12 00:00:00             0   \n",
+       "4        ford              nein  2016-04-01 00:00:00             0   \n",
+       "\n",
+       "   postalCode             lastSeen  \n",
+       "0       79588  2016-04-06 06:45:54  \n",
+       "1       71034  2016-04-06 14:45:08  \n",
+       "2       35394  2016-04-06 20:15:37  \n",
+       "3       33729  2016-03-15 03:16:28  \n",
+       "4       39218  2016-04-01 14:38:50  "
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "autos = pd.read_csv(\"auctioned.csv\", encoding = \"latin-1\") # utf-8, latin-1, windows-1251 \n",
+    "autos.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 50000 entries, 0 to 49999\n",
+      "Data columns (total 20 columns):\n",
+      " #   Column               Non-Null Count  Dtype \n",
+      "---  ------               --------------  ----- \n",
+      " 0   dateCrawled          50000 non-null  object\n",
+      " 1   name                 50000 non-null  object\n",
+      " 2   seller               50000 non-null  object\n",
+      " 3   offerType            50000 non-null  object\n",
+      " 4   price                50000 non-null  object\n",
+      " 5   abtest               50000 non-null  object\n",
+      " 6   vehicleType          44905 non-null  object\n",
+      " 7   yearOfRegistration   50000 non-null  int64 \n",
+      " 8   gearbox              47320 non-null  object\n",
+      " 9   powerPS              50000 non-null  int64 \n",
+      " 10  model                47242 non-null  object\n",
+      " 11  odometer             50000 non-null  object\n",
+      " 12  monthOfRegistration  50000 non-null  int64 \n",
+      " 13  fuelType             45518 non-null  object\n",
+      " 14  brand                50000 non-null  object\n",
+      " 15  notRepairedDamage    40171 non-null  object\n",
+      " 16  dateCreated          50000 non-null  object\n",
+      " 17  nrOfPictures         50000 non-null  int64 \n",
+      " 18  postalCode           50000 non-null  int64 \n",
+      " 19  lastSeen             50000 non-null  object\n",
+      "dtypes: int64(5), object(15)\n",
+      "memory usage: 7.6+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "autos.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>yearOfRegistration</th>\n",
+       "      <th>powerPS</th>\n",
+       "      <th>monthOfRegistration</th>\n",
+       "      <th>nrOfPictures</th>\n",
+       "      <th>postalCode</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>count</th>\n",
+       "      <td>50000.000000</td>\n",
+       "      <td>50000.000000</td>\n",
+       "      <td>50000.000000</td>\n",
+       "      <td>50000.0</td>\n",
+       "      <td>50000.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>mean</th>\n",
+       "      <td>2005.073280</td>\n",
+       "      <td>116.355920</td>\n",
+       "      <td>5.723360</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>50813.627300</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>std</th>\n",
+       "      <td>105.712813</td>\n",
+       "      <td>209.216627</td>\n",
+       "      <td>3.711984</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>25779.747957</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>min</th>\n",
+       "      <td>1000.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1067.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25%</th>\n",
+       "      <td>1999.000000</td>\n",
+       "      <td>70.000000</td>\n",
+       "      <td>3.000000</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>30451.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>50%</th>\n",
+       "      <td>2003.000000</td>\n",
+       "      <td>105.000000</td>\n",
+       "      <td>6.000000</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>49577.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>75%</th>\n",
+       "      <td>2008.000000</td>\n",
+       "      <td>150.000000</td>\n",
+       "      <td>9.000000</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>71540.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>max</th>\n",
+       "      <td>9999.000000</td>\n",
+       "      <td>17700.000000</td>\n",
+       "      <td>12.000000</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>99998.000000</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       yearOfRegistration       powerPS  monthOfRegistration  nrOfPictures  \\\n",
+       "count        50000.000000  50000.000000         50000.000000       50000.0   \n",
+       "mean          2005.073280    116.355920             5.723360           0.0   \n",
+       "std            105.712813    209.216627             3.711984           0.0   \n",
+       "min           1000.000000      0.000000             0.000000           0.0   \n",
+       "25%           1999.000000     70.000000             3.000000           0.0   \n",
+       "50%           2003.000000    105.000000             6.000000           0.0   \n",
+       "75%           2008.000000    150.000000             9.000000           0.0   \n",
+       "max           9999.000000  17700.000000            12.000000           0.0   \n",
+       "\n",
+       "         postalCode  \n",
+       "count  50000.000000  \n",
+       "mean   50813.627300  \n",
+       "std    25779.747957  \n",
+       "min     1067.000000  \n",
+       "25%    30451.000000  \n",
+       "50%    49577.000000  \n",
+       "75%    71540.000000  \n",
+       "max    99998.000000  "
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "autos.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>dateCrawled</th>\n",
+       "      <th>name</th>\n",
+       "      <th>seller</th>\n",
+       "      <th>offerType</th>\n",
+       "      <th>price</th>\n",
+       "      <th>abtest</th>\n",
+       "      <th>vehicleType</th>\n",
+       "      <th>yearOfRegistration</th>\n",
+       "      <th>gearbox</th>\n",
+       "      <th>powerPS</th>\n",
+       "      <th>model</th>\n",
+       "      <th>odometer</th>\n",
+       "      <th>monthOfRegistration</th>\n",
+       "      <th>fuelType</th>\n",
+       "      <th>brand</th>\n",
+       "      <th>notRepairedDamage</th>\n",
+       "      <th>dateCreated</th>\n",
+       "      <th>nrOfPictures</th>\n",
+       "      <th>postalCode</th>\n",
+       "      <th>lastSeen</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>count</th>\n",
+       "      <td>50000</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>44905</td>\n",
+       "      <td>50000.000000</td>\n",
+       "      <td>47320</td>\n",
+       "      <td>50000.000000</td>\n",
+       "      <td>47242</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>50000.000000</td>\n",
+       "      <td>45518</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>40171</td>\n",
+       "      <td>50000</td>\n",
+       "      <td>50000.0</td>\n",
+       "      <td>50000.000000</td>\n",
+       "      <td>50000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>unique</th>\n",
+       "      <td>48213</td>\n",
+       "      <td>38754</td>\n",
+       "      <td>2</td>\n",
+       "      <td>2</td>\n",
+       "      <td>2357</td>\n",
+       "      <td>2</td>\n",
+       "      <td>8</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>245</td>\n",
+       "      <td>13</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>7</td>\n",
+       "      <td>40</td>\n",
+       "      <td>2</td>\n",
+       "      <td>76</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>39481</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>top</th>\n",
+       "      <td>2016-03-11 22:38:16</td>\n",
+       "      <td>Ford_Fiesta</td>\n",
+       "      <td>privat</td>\n",
+       "      <td>Angebot</td>\n",
+       "      <td>$0</td>\n",
+       "      <td>test</td>\n",
+       "      <td>limousine</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>golf</td>\n",
+       "      <td>150,000km</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>volkswagen</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-04-03 00:00:00</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2016-04-07 06:17:27</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>freq</th>\n",
+       "      <td>3</td>\n",
+       "      <td>78</td>\n",
+       "      <td>49999</td>\n",
+       "      <td>49999</td>\n",
+       "      <td>1421</td>\n",
+       "      <td>25756</td>\n",
+       "      <td>12859</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>36993</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>4024</td>\n",
+       "      <td>32424</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>30107</td>\n",
+       "      <td>10687</td>\n",
+       "      <td>35232</td>\n",
+       "      <td>1946</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>8</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>mean</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2005.073280</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>116.355920</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>5.723360</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>50813.627300</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>std</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>105.712813</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>209.216627</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>3.711984</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>25779.747957</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>min</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1000.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1067.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25%</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>1999.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>70.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>3.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>30451.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>50%</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2003.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>105.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>6.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>49577.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>75%</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2008.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>150.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>9.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>71540.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>max</th>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>9999.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>17700.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>12.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>99998.000000</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                dateCrawled         name  seller offerType  price abtest  \\\n",
+       "count                 50000        50000   50000     50000  50000  50000   \n",
+       "unique                48213        38754       2         2   2357      2   \n",
+       "top     2016-03-11 22:38:16  Ford_Fiesta  privat   Angebot     $0   test   \n",
+       "freq                      3           78   49999     49999   1421  25756   \n",
+       "mean                    NaN          NaN     NaN       NaN    NaN    NaN   \n",
+       "std                     NaN          NaN     NaN       NaN    NaN    NaN   \n",
+       "min                     NaN          NaN     NaN       NaN    NaN    NaN   \n",
+       "25%                     NaN          NaN     NaN       NaN    NaN    NaN   \n",
+       "50%                     NaN          NaN     NaN       NaN    NaN    NaN   \n",
+       "75%                     NaN          NaN     NaN       NaN    NaN    NaN   \n",
+       "max                     NaN          NaN     NaN       NaN    NaN    NaN   \n",
+       "\n",
+       "       vehicleType  yearOfRegistration  gearbox       powerPS  model  \\\n",
+       "count        44905        50000.000000    47320  50000.000000  47242   \n",
+       "unique           8                 NaN        2           NaN    245   \n",
+       "top      limousine                 NaN  manuell           NaN   golf   \n",
+       "freq         12859                 NaN    36993           NaN   4024   \n",
+       "mean           NaN         2005.073280      NaN    116.355920    NaN   \n",
+       "std            NaN          105.712813      NaN    209.216627    NaN   \n",
+       "min            NaN         1000.000000      NaN      0.000000    NaN   \n",
+       "25%            NaN         1999.000000      NaN     70.000000    NaN   \n",
+       "50%            NaN         2003.000000      NaN    105.000000    NaN   \n",
+       "75%            NaN         2008.000000      NaN    150.000000    NaN   \n",
+       "max            NaN         9999.000000      NaN  17700.000000    NaN   \n",
+       "\n",
+       "         odometer  monthOfRegistration fuelType       brand notRepairedDamage  \\\n",
+       "count       50000         50000.000000    45518       50000             40171   \n",
+       "unique         13                  NaN        7          40                 2   \n",
+       "top     150,000km                  NaN   benzin  volkswagen              nein   \n",
+       "freq        32424                  NaN    30107       10687             35232   \n",
+       "mean          NaN             5.723360      NaN         NaN               NaN   \n",
+       "std           NaN             3.711984      NaN         NaN               NaN   \n",
+       "min           NaN             0.000000      NaN         NaN               NaN   \n",
+       "25%           NaN             3.000000      NaN         NaN               NaN   \n",
+       "50%           NaN             6.000000      NaN         NaN               NaN   \n",
+       "75%           NaN             9.000000      NaN         NaN               NaN   \n",
+       "max           NaN            12.000000      NaN         NaN               NaN   \n",
+       "\n",
+       "                dateCreated  nrOfPictures    postalCode             lastSeen  \n",
+       "count                 50000       50000.0  50000.000000                50000  \n",
+       "unique                   76           NaN           NaN                39481  \n",
+       "top     2016-04-03 00:00:00           NaN           NaN  2016-04-07 06:17:27  \n",
+       "freq                   1946           NaN           NaN                    8  \n",
+       "mean                    NaN           0.0  50813.627300                  NaN  \n",
+       "std                     NaN           0.0  25779.747957                  NaN  \n",
+       "min                     NaN           0.0   1067.000000                  NaN  \n",
+       "25%                     NaN           0.0  30451.000000                  NaN  \n",
+       "50%                     NaN           0.0  49577.000000                  NaN  \n",
+       "75%                     NaN           0.0  71540.000000                  NaN  \n",
+       "max                     NaN           0.0  99998.000000                  NaN  "
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "autos.describe(include = \"all\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "autos.drop([\"seller\",\"offerType\",\"nrOfPictures\"], axis = 1, inplace = True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "autos[\"dateCrawled\"] = pd.to_datetime(autos[\"dateCrawled\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Timestamp('2016-04-07 14:36:56')"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "autos[\"dateCrawled\"].max()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "autos[\"price\"] = autos[\"price\"].str.strip(\"$\").str.replace(\",\",\"\").astype(float)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "autos[\"odometer\"] = autos[\"odometer\"].str.strip(\"km\").str.replace(\",\",\"\").astype(float)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 50000 entries, 0 to 49999\n",
+      "Data columns (total 17 columns):\n",
+      " #   Column               Non-Null Count  Dtype         \n",
+      "---  ------               --------------  -----         \n",
+      " 0   dateCrawled          50000 non-null  datetime64[ns]\n",
+      " 1   name                 50000 non-null  object        \n",
+      " 2   price                50000 non-null  float64       \n",
+      " 3   abtest               50000 non-null  object        \n",
+      " 4   vehicleType          44905 non-null  object        \n",
+      " 5   yearOfRegistration   50000 non-null  int64         \n",
+      " 6   gearbox              47320 non-null  object        \n",
+      " 7   powerPS              50000 non-null  int64         \n",
+      " 8   model                47242 non-null  object        \n",
+      " 9   odometer             50000 non-null  float64       \n",
+      " 10  monthOfRegistration  50000 non-null  int64         \n",
+      " 11  fuelType             45518 non-null  object        \n",
+      " 12  brand                50000 non-null  object        \n",
+      " 13  notRepairedDamage    40171 non-null  object        \n",
+      " 14  dateCreated          50000 non-null  object        \n",
+      " 15  postalCode           50000 non-null  int64         \n",
+      " 16  lastSeen             50000 non-null  object        \n",
+      "dtypes: datetime64[ns](1), float64(2), int64(4), object(10)\n",
+      "memory usage: 6.5+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "autos.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1000    1\n",
+       "1001    1\n",
+       "1111    1\n",
+       "1500    1\n",
+       "1800    2\n",
+       "1910    9\n",
+       "1927    1\n",
+       "1929    1\n",
+       "1931    1\n",
+       "1934    2\n",
+       "Name: yearOfRegistration, dtype: int64"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "autos[\"yearOfRegistration\"].value_counts().sort_index().head(10)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2016    1316\n",
+       "2017    1453\n",
+       "2018     492\n",
+       "2019       3\n",
+       "2800       1\n",
+       "4100       1\n",
+       "4500       1\n",
+       "4800       1\n",
+       "5000       4\n",
+       "5911       1\n",
+       "6200       1\n",
+       "8888       1\n",
+       "9000       2\n",
+       "9996       1\n",
+       "9999       4\n",
+       "Name: yearOfRegistration, dtype: int64"
+      ]
+     },
+     "execution_count": 24,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "autos[\"yearOfRegistration\"].value_counts().sort_index().tail(15)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "48028"
+      ]
+     },
+     "execution_count": 30,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "((autos[\"yearOfRegistration\"]>1900) & (autos[\"yearOfRegistration\"]<=2016)).sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1972"
+      ]
+     },
+     "execution_count": 31,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "50000-48028"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "3.944"
+      ]
+     },
+     "execution_count": 32,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "1972*100/50000"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "48028"
+      ]
+     },
+     "execution_count": 35,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "((autos[\"yearOfRegistration\"]>1900) & (autos[\"yearOfRegistration\"]<=2016)).sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "48028"
+      ]
+     },
+     "execution_count": 37,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "autos[\"yearOfRegistration\"].between(1900,2016).sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1972"
+      ]
+     },
+     "execution_count": 39,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(~autos[\"yearOfRegistration\"].between(1900,2016)).sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "3.944"
+      ]
+     },
+     "execution_count": 42,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(~autos[\"yearOfRegistration\"].between(1900,2016)).sum()*100/autos.shape[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bol_reg = autos[\"yearOfRegistration\"].between(1900,2016)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "corrected_autos = autos[bol_reg].copy()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1910"
+      ]
+     },
+     "execution_count": 46,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "corrected_autos[\"yearOfRegistration\"].min()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2016"
+      ]
+     },
+     "execution_count": 47,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "corrected_autos[\"yearOfRegistration\"].max()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "count    4.802800e+04\n",
+       "mean     9.585252e+03\n",
+       "std      4.843817e+05\n",
+       "min      0.000000e+00\n",
+       "25%      1.150000e+03\n",
+       "50%      2.990000e+03\n",
+       "75%      7.400000e+03\n",
+       "max      1.000000e+08\n",
+       "Name: price, dtype: float64"
+      ]
+     },
+     "execution_count": 48,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "corrected_autos[\"price\"].describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.0           1335\n",
+       "1.0            150\n",
+       "2.0              2\n",
+       "3.0              1\n",
+       "5.0              2\n",
+       "              ... \n",
+       "10000000.0       1\n",
+       "11111111.0       2\n",
+       "12345678.0       1\n",
+       "27322222.0       1\n",
+       "99999999.0       1\n",
+       "Name: price, Length: 2334, dtype: int64"
+      ]
+     },
+     "execution_count": 50,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "corrected_autos[\"price\"].value_counts().sort_index()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "265000.0      1\n",
+       "295000.0      1\n",
+       "299000.0      1\n",
+       "345000.0      1\n",
+       "350000.0      1\n",
+       "999990.0      1\n",
+       "999999.0      2\n",
+       "1234566.0     1\n",
+       "1300000.0     1\n",
+       "3890000.0     1\n",
+       "10000000.0    1\n",
+       "11111111.0    2\n",
+       "12345678.0    1\n",
+       "27322222.0    1\n",
+       "99999999.0    1\n",
+       "Name: price, dtype: int64"
+      ]
+     },
+     "execution_count": 52,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "corrected_autos[\"price\"].value_counts().sort_index().tail(15)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "price_bol = corrected_autos[\"price\"].between(1,350000)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "cleaned = corrected_autos[price_bol].copy()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 55,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1.0"
+      ]
+     },
+     "execution_count": 55,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cleaned[\"price\"].min()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "350000.0"
+      ]
+     },
+     "execution_count": 56,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cleaned[\"price\"].max()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2.8046139751811445"
+      ]
+     },
+     "execution_count": 57,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(corrected_autos.shape[0] - cleaned.shape[0])*100/corrected_autos.shape[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 58,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(46681, 17)"
+      ]
+     },
+     "execution_count": 58,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cleaned.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "Int64Index: 46681 entries, 0 to 49999\n",
+      "Data columns (total 17 columns):\n",
+      " #   Column               Non-Null Count  Dtype         \n",
+      "---  ------               --------------  -----         \n",
+      " 0   dateCrawled          46681 non-null  datetime64[ns]\n",
+      " 1   name                 46681 non-null  object        \n",
+      " 2   price                46681 non-null  float64       \n",
+      " 3   abtest               46681 non-null  object        \n",
+      " 4   vehicleType          43977 non-null  object        \n",
+      " 5   yearOfRegistration   46681 non-null  int64         \n",
+      " 6   gearbox              44571 non-null  object        \n",
+      " 7   powerPS              46681 non-null  int64         \n",
+      " 8   model                44488 non-null  object        \n",
+      " 9   odometer             46681 non-null  float64       \n",
+      " 10  monthOfRegistration  46681 non-null  int64         \n",
+      " 11  fuelType             43363 non-null  object        \n",
+      " 12  brand                46681 non-null  object        \n",
+      " 13  notRepairedDamage    38374 non-null  object        \n",
+      " 14  dateCreated          46681 non-null  object        \n",
+      " 15  postalCode           46681 non-null  int64         \n",
+      " 16  lastSeen             46681 non-null  object        \n",
+      "dtypes: datetime64[ns](1), float64(2), int64(4), object(10)\n",
+      "memory usage: 6.4+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "cleaned.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "norm_brands = cleaned[\"brand\"].value_counts(normalize = True)*100"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 68,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "volkswagen       21.126368\n",
+       "bmw              11.004477\n",
+       "opel             10.758124\n",
+       "mercedes_benz     9.646323\n",
+       "audi              8.656627\n",
+       "ford              6.989996\n",
+       "Name: brand, dtype: float64"
+      ]
+     },
+     "execution_count": 68,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bol = norm_brands>5\n",
+    "\n",
+    "common_brand = norm_brands[bol]\n",
+    "common_brand"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Index(['volkswagen', 'bmw', 'opel', 'mercedes_benz', 'audi', 'ford'], dtype='object')"
+      ]
+     },
+     "execution_count": 69,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "common_brand.index"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 70,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# cleaned[\"brand\"] == 'volkswagen' |cleaned[\"brand\"] == 'bmw'-----------"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 75,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "brand_bol = cleaned[\"brand\"].isin(common_brand.index)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 76,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "popular_brands = cleaned[brand_bol].copy()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 77,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "volkswagen       9862\n",
+       "bmw              5137\n",
+       "opel             5022\n",
+       "mercedes_benz    4503\n",
+       "audi             4041\n",
+       "ford             3263\n",
+       "Name: brand, dtype: int64"
+      ]
+     },
+     "execution_count": 77,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "popular_brands[\"brand\"].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 78,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(31828, 17)"
+      ]
+     },
+     "execution_count": 78,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "popular_brands.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 79,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "Int64Index: 31828 entries, 1 to 49999\n",
+      "Data columns (total 17 columns):\n",
+      " #   Column               Non-Null Count  Dtype         \n",
+      "---  ------               --------------  -----         \n",
+      " 0   dateCrawled          31828 non-null  datetime64[ns]\n",
+      " 1   name                 31828 non-null  object        \n",
+      " 2   price                31828 non-null  float64       \n",
+      " 3   abtest               31828 non-null  object        \n",
+      " 4   vehicleType          30015 non-null  object        \n",
+      " 5   yearOfRegistration   31828 non-null  int64         \n",
+      " 6   gearbox              30494 non-null  object        \n",
+      " 7   powerPS              31828 non-null  int64         \n",
+      " 8   model                30679 non-null  object        \n",
+      " 9   odometer             31828 non-null  float64       \n",
+      " 10  monthOfRegistration  31828 non-null  int64         \n",
+      " 11  fuelType             29629 non-null  object        \n",
+      " 12  brand                31828 non-null  object        \n",
+      " 13  notRepairedDamage    26053 non-null  object        \n",
+      " 14  dateCreated          31828 non-null  object        \n",
+      " 15  postalCode           31828 non-null  int64         \n",
+      " 16  lastSeen             31828 non-null  object        \n",
+      "dtypes: datetime64[ns](1), float64(2), int64(4), object(10)\n",
+      "memory usage: 4.4+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "popular_brands.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 80,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>dateCrawled</th>\n",
+       "      <th>name</th>\n",
+       "      <th>price</th>\n",
+       "      <th>abtest</th>\n",
+       "      <th>vehicleType</th>\n",
+       "      <th>yearOfRegistration</th>\n",
+       "      <th>gearbox</th>\n",
+       "      <th>powerPS</th>\n",
+       "      <th>model</th>\n",
+       "      <th>odometer</th>\n",
+       "      <th>monthOfRegistration</th>\n",
+       "      <th>fuelType</th>\n",
+       "      <th>brand</th>\n",
+       "      <th>notRepairedDamage</th>\n",
+       "      <th>dateCreated</th>\n",
+       "      <th>postalCode</th>\n",
+       "      <th>lastSeen</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2016-04-04 13:38:56</td>\n",
+       "      <td>BMW_740i_4_4_Liter_HAMANN_UMBAU_Mega_Optik</td>\n",
+       "      <td>8500.0</td>\n",
+       "      <td>control</td>\n",
+       "      <td>limousine</td>\n",
+       "      <td>1997</td>\n",
+       "      <td>automatik</td>\n",
+       "      <td>286</td>\n",
+       "      <td>7er</td>\n",
+       "      <td>150000.0</td>\n",
+       "      <td>6</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>bmw</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-04-04 00:00:00</td>\n",
+       "      <td>71034</td>\n",
+       "      <td>2016-04-06 14:45:08</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>2016-03-26 18:57:24</td>\n",
+       "      <td>Volkswagen_Golf_1.6_United</td>\n",
+       "      <td>8990.0</td>\n",
+       "      <td>test</td>\n",
+       "      <td>limousine</td>\n",
+       "      <td>2009</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>102</td>\n",
+       "      <td>golf</td>\n",
+       "      <td>70000.0</td>\n",
+       "      <td>7</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>volkswagen</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-03-26 00:00:00</td>\n",
+       "      <td>35394</td>\n",
+       "      <td>2016-04-06 20:15:37</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>2016-04-01 14:38:50</td>\n",
+       "      <td>Ford_Focus_1_6_Benzin_TÜV_neu_ist_sehr_gepfleg...</td>\n",
+       "      <td>1350.0</td>\n",
+       "      <td>test</td>\n",
+       "      <td>kombi</td>\n",
+       "      <td>2003</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>0</td>\n",
+       "      <td>focus</td>\n",
+       "      <td>150000.0</td>\n",
+       "      <td>7</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>ford</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-04-01 00:00:00</td>\n",
+       "      <td>39218</td>\n",
+       "      <td>2016-04-01 14:38:50</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>2016-03-20 17:55:21</td>\n",
+       "      <td>VW_Golf_III_GT_Special_Electronic_Green_Metall...</td>\n",
+       "      <td>300.0</td>\n",
+       "      <td>test</td>\n",
+       "      <td>limousine</td>\n",
+       "      <td>1995</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>90</td>\n",
+       "      <td>golf</td>\n",
+       "      <td>150000.0</td>\n",
+       "      <td>8</td>\n",
+       "      <td>benzin</td>\n",
+       "      <td>volkswagen</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2016-03-20 00:00:00</td>\n",
+       "      <td>31535</td>\n",
+       "      <td>2016-03-23 02:48:59</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>2016-03-16 18:55:19</td>\n",
+       "      <td>Golf_IV_1.9_TDI_90PS</td>\n",
+       "      <td>1990.0</td>\n",
+       "      <td>control</td>\n",
+       "      <td>limousine</td>\n",
+       "      <td>1998</td>\n",
+       "      <td>manuell</td>\n",
+       "      <td>90</td>\n",
+       "      <td>golf</td>\n",
+       "      <td>150000.0</td>\n",
+       "      <td>12</td>\n",
+       "      <td>diesel</td>\n",
+       "      <td>volkswagen</td>\n",
+       "      <td>nein</td>\n",
+       "      <td>2016-03-16 00:00:00</td>\n",
+       "      <td>53474</td>\n",
+       "      <td>2016-04-07 03:17:32</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          dateCrawled                                               name  \\\n",
+       "1 2016-04-04 13:38:56         BMW_740i_4_4_Liter_HAMANN_UMBAU_Mega_Optik   \n",
+       "2 2016-03-26 18:57:24                         Volkswagen_Golf_1.6_United   \n",
+       "4 2016-04-01 14:38:50  Ford_Focus_1_6_Benzin_TÜV_neu_ist_sehr_gepfleg...   \n",
+       "6 2016-03-20 17:55:21  VW_Golf_III_GT_Special_Electronic_Green_Metall...   \n",
+       "7 2016-03-16 18:55:19                               Golf_IV_1.9_TDI_90PS   \n",
+       "\n",
+       "    price   abtest vehicleType  yearOfRegistration    gearbox  powerPS  model  \\\n",
+       "1  8500.0  control   limousine                1997  automatik      286    7er   \n",
+       "2  8990.0     test   limousine                2009    manuell      102   golf   \n",
+       "4  1350.0     test       kombi                2003    manuell        0  focus   \n",
+       "6   300.0     test   limousine                1995    manuell       90   golf   \n",
+       "7  1990.0  control   limousine                1998    manuell       90   golf   \n",
+       "\n",
+       "   odometer  monthOfRegistration fuelType       brand notRepairedDamage  \\\n",
+       "1  150000.0                    6   benzin         bmw              nein   \n",
+       "2   70000.0                    7   benzin  volkswagen              nein   \n",
+       "4  150000.0                    7   benzin        ford              nein   \n",
+       "6  150000.0                    8   benzin  volkswagen               NaN   \n",
+       "7  150000.0                   12   diesel  volkswagen              nein   \n",
+       "\n",
+       "           dateCreated  postalCode             lastSeen  \n",
+       "1  2016-04-04 00:00:00       71034  2016-04-06 14:45:08  \n",
+       "2  2016-03-26 00:00:00       35394  2016-04-06 20:15:37  \n",
+       "4  2016-04-01 00:00:00       39218  2016-04-01 14:38:50  \n",
+       "6  2016-03-20 00:00:00       31535  2016-03-23 02:48:59  \n",
+       "7  2016-03-16 00:00:00       53474  2016-04-07 03:17:32  "
+      ]
+     },
+     "execution_count": 80,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "popular_brands.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "brand\n",
+       "audi             9336.687454\n",
+       "mercedes_benz    8628.450366\n",
+       "bmw              8332.820518\n",
+       "volkswagen       5402.410262\n",
+       "ford             3749.469507\n",
+       "opel             2975.241935\n",
+       "Name: price, dtype: float64"
+      ]
+     },
+     "execution_count": 89,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "brand_mean_price = popular_brands.groupby(\"brand\")[\"price\"].mean().sort_values(ascending = False)\n",
+    "brand_mean_price"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 90,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "brand\n",
+       "bmw              132572.513140\n",
+       "mercedes_benz    130788.363313\n",
+       "opel             129310.035842\n",
+       "audi             129157.386785\n",
+       "volkswagen       128707.158791\n",
+       "ford             124266.012872\n",
+       "Name: odometer, dtype: float64"
+      ]
+     },
+     "execution_count": 90,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "brand_mean_mileage = popular_brands.groupby(\"brand\")[\"odometer\"].mean().sort_values(ascending = False)\n",
+    "brand_mean_mileage"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 96,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "price_mil = pd.DataFrame(data = brand_mean_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 98,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "price_mil.columns = [\"mean_price\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 100,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "price_mil.index.name = None"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 102,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "price_mil[\"mean_mileage\"] = brand_mean_mileage"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 103,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>mean_price</th>\n",
+       "      <th>mean_mileage</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>audi</th>\n",
+       "      <td>9336.687454</td>\n",
+       "      <td>129157.386785</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>mercedes_benz</th>\n",
+       "      <td>8628.450366</td>\n",
+       "      <td>130788.363313</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>bmw</th>\n",
+       "      <td>8332.820518</td>\n",
+       "      <td>132572.513140</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>volkswagen</th>\n",
+       "      <td>5402.410262</td>\n",
+       "      <td>128707.158791</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>ford</th>\n",
+       "      <td>3749.469507</td>\n",
+       "      <td>124266.012872</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>opel</th>\n",
+       "      <td>2975.241935</td>\n",
+       "      <td>129310.035842</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                mean_price   mean_mileage\n",
+       "audi           9336.687454  129157.386785\n",
+       "mercedes_benz  8628.450366  130788.363313\n",
+       "bmw            8332.820518  132572.513140\n",
+       "volkswagen     5402.410262  128707.158791\n",
+       "ford           3749.469507  124266.012872\n",
+       "opel           2975.241935  129310.035842"
+      ]
+     },
+     "execution_count": 103,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "price_mil"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 106,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 107,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAAAYoAAAE8CAYAAADe7fZ4AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4yLjIsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+WH4yJAAAgAElEQVR4nO3dfbhVZZ3/8feHA4KZGPIUeEzQGBVQUAFx1KywsDLRBg3SEdOifEydZsTMS6eyyanJUX+/dJgk0CxRysTKEp8ylUQQHR9IZJTwDIziE6mFAX7nj3Uf2uewWRz23px1zubzuq59nb3vve51vhtrf86677XWrYjAzMxsc7oUXYCZmXVsDgozM8vloDAzs1wOCjMzy+WgMDOzXF2LLqDW+vTpE4MGDSq6DDOzTmXRokUvR0Tfcu/VXVAMGjSIhQsXFl2GmVmnIukPm3vPQ09mZpbLQWFmZrkcFGZmlqvu5ijMrH2tW7eOpqYm1q5dW3Qp1gY9evSgsbGRbt26tbmPg8LMqtLU1MTOO+/MoEGDkFR0OZYjInjllVdoampi8ODBbe7noSczq8ratWvp3bu3Q6ITkETv3r23+ujPQWFmVXNIdB6V/LdyUJiZWS7PUZhZTQ2a9oua7m/5tz5R0/3Z1nNQ2Pbt0l0q7LemtnXYdmPu3Lk8/fTTTJs2rehS2sxBYWbWTtavX88xxxzDMcccU3QpW8VzFGbW6S1fvpx99tmHz33ucwwfPpwTTzyRu+66i0MPPZQhQ4awYMEC3nrrLU499VRGjx7NAQccwG233bax7+GHH86BBx7IgQceyEMPPQTAfffdxwc/+EEmTpzIPvvsw4knnkje0tGDBg3iggsuYMyYMYwZM4Zly5YBcMopp3D++efzoQ99iAsuuICZM2dy1llnAfDiiy9y3HHHMWLECEaMGLHxd//whz9kzJgxjBw5ki984Qts2LBhW/7zbZGPKCyfh2ask1i2bBm33HIL06dPZ/To0fzoRz/igQceYO7cuXzzm99k6NChfPjDH2bGjBm8/vrrjBkzhiOPPJJ+/foxb948evTowbPPPsvkyZM33lh08eLFPPXUUwwcOJBDDz2UBx98kMMOO2yzNfTs2ZMFCxZw/fXXc+655/Lzn/8cgKVLl3LXXXfR0NDAzJkzN25/zjnncMQRR3DrrbeyYcMG3nzzTZYsWcLs2bN58MEH6datG2eccQY33ngjJ5988jb998vjoDCzujB48GD2228/AIYNG8a4ceOQxH777cfy5ctpampi7ty5fOc73wGy6z9WrFjBwIEDOeuss3jsscdoaGhg6dKlG/c5ZswYGhsbARg5ciTLly/PDYrJkydv/HneeedtbD/++ONpaGjYZPt77rmH66+/HoCGhgZ22WUXbrjhBhYtWsTo0aMB+POf/0y/fv2q+aepmoOiWv6L26xD6N69+8bnXbp02fi6S5curF+/noaGBn7yk5+w9957t+h36aWX0r9/fx5//HHeeecdevToUXafDQ0NrF+/PreG0msUSp/vtNNObf4cEcGUKVP4l7NPaPnGysVt28HAA9r8u9rKQWFWzwr4Q6ajns46fvx4rr76aq6++moksXjxYg444ADWrFlDY2MjXbp0YdasWVXNB8yePZtp06Yxe/ZsDjnkkC1uP27cOK655hrOPfdcNmzYwFtvvcW4ceOYMGEC500+kn59duXV19bwxltvsUfjwIrrqpYns81su3DxxRezbt069t9/f4YPH87FF18MwBlnnMGsWbMYO3YsS5cu3aq//lt7++23Ofjgg7nyyiu54oortrj9lVdeyb333st+++3HQQcdxFNPPcXQoUP5xje+wUcnn8H+R57ARyafzqoXX664plpQ3ix+ZzRq1Kho1xXu6n3oyZ9vM/38+ZotWbKEfffdt7LfU0eaV9fs06dPbXbY1qGm1tow9FTuv5mkRRExqtz2PqIwM7NcnqMwM9sKxx13HM8//3yLtssvv5zly5cXU1A7cFCYmW2FW2+9tegS2p2HnszMLJePKMys86pkwncbXGdQ73xEYWZmuXxEYWa1VekpuZvdXyc5FbmObfGIQtIMSS9JerKk7duSfi/pvyTdKuk9Je9dKGmZpGckjS9pP0jSE+m9q5Sub5fUXdLs1P6wpEElfaZIejY9ptTqQ5uZFWHlypVMnDgRyO5Oe/TRRxdcUdu0ZehpJnBUq7Z5wPCI2B9YClwIIGkoMAkYlvp8T1LznbCuAaYCQ9KjeZ+nAa9FxPuBK4DL0752BS4BDgbGAJdI6rX1H9HMrGMYOHAgc+bMKbqMrbbFoIiI+4FXW7XdGRHNd8f6HdCYnk8AboqItyPieWAZMEbSAKBnRMyP7FLw64FjS/rMSs/n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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "price_mil.plot.bar()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 108,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "normalize = price_mil.copy()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 109,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Index(['mean_price', 'mean_mileage'], dtype='object')"
+      ]
+     },
+     "execution_count": 109,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cols = price_mil.columns\n",
+    "cols"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 111,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# normalize[\"mean_price\"] = normalize[\"mean_price\"]/normalize[\"mean_price\"].sum()\n",
+    "# normalize[\"mean_mileage\"] = normalize[\"mean_mileage\"]/normalize[\"mean_mileage\"].sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 114,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "mean_price\n",
+      "mean_mileage\n"
+     ]
+    }
+   ],
+   "source": [
+    "for i in cols:\n",
+    "    print(i)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 115,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for i in cols:\n",
+    "    normalize[i] = normalize[i]/normalize[i].sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 116,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>mean_price</th>\n",
+       "      <th>mean_mileage</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>audi</th>\n",
+       "      <td>0.242984</td>\n",
+       "      <td>0.166697</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>mercedes_benz</th>\n",
+       "      <td>0.224553</td>\n",
+       "      <td>0.168802</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>bmw</th>\n",
+       "      <td>0.216859</td>\n",
+       "      <td>0.171105</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>volkswagen</th>\n",
+       "      <td>0.140596</td>\n",
+       "      <td>0.166116</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>ford</th>\n",
+       "      <td>0.097579</td>\n",
+       "      <td>0.160384</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>opel</th>\n",
+       "      <td>0.077430</td>\n",
+       "      <td>0.166894</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "               mean_price  mean_mileage\n",
+       "audi             0.242984      0.166697\n",
+       "mercedes_benz    0.224553      0.168802\n",
+       "bmw              0.216859      0.171105\n",
+       "volkswagen       0.140596      0.166116\n",
+       "ford             0.097579      0.160384\n",
+       "opel             0.077430      0.166894"
+      ]
+     },
+     "execution_count": 116,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "normalize"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 117,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "3600"
+      ]
+     },
+     "execution_count": 117,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "60*60"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 123,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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P5DVQLu6krqlWvLB9ofXzJpjxIgRPP/885x//qeuGa5bThBmZjW2YMECDjzwQA488MCyQ2kWj+ZqZm3WtGnT2GqrrTj++OPp27cvRxxxBA899BA777wzW2yxBWPGjGHevHkce+yxDBo0iG233ZZ77rln0b677ror2223Hdtttx2PPfYYACNHjmS33XbjkEMOYauttuKII45gSdMi9OzZk/POO4/BgwczePBgJk9OkygeffTRnH322ey+++6cd955/OEPf+DUU08F4PXXX+fggw9mwIABDBgwYNFz//GPf2Tw4MFss802nHjiiSxcWO3077XhBGFmbdrkyZM544wzeOaZZ3jhhRe45ZZbePTRR7n88sv58Y9/zKWXXsoee+zB2LFjefjhhzn33HOZN28e6667Lg8++CBPPPEEw4cP5/TTT1/0mE8++SS/+MUveP7555kyZQqjRo1aYgyrrbYaY8aM4dRTT+XMM89ctHzSpEk89NBDXHHFFYttf/rppzNkyBCefvppnnjiCfr06cPEiRMZPnw4o0aN4qmnnqJz587cfPPNrftiNZOrmMysTevVqxf9+vUDoE+fPuy5555Iol+/fkybNo2GhgZGjBjB5ZdfDqTrN1555RW6d+/OqaeeuujHeNKkRT3tGTx4MD16pJF/ttlmG6ZNm8Yuu+zy6SfPHH744Yv+n3XWWYuWH3rooXTu3PlT2//973/nxhtvBKBz586svvrq3HTTTYwfP55BgwYB8P7777PuuusuzUuz1JwgzKxNW3HFFRfd7tSp06L7nTp1YsGCBXTu3Jk777yTLbfccrH9LrroItZbbz2efvppPv74Y7p06VL4mJ07d2bBgiVP652/xiB/e5VVVqn6OCKCo446issuu6zqfWrNCcLMWkW99uwbOnQoV111FVdddRWSePLJJ9l2221555136NGjB506deKGG25Yqvr+4cOHc/755zN8+HB22mmnz9x+zz335Oqrr+bMM89k4cKFzJs3jz333JODDjqIs846i3XXXZe33nqLOXPmsMkmm7Q4rqXlNggza9cuvPBC5s+fT//+/enbty8XXnghACeffDI33HADO+64I5MmTWrW2X5jH374ITvssANXXnklP//5zz9z+yuvvJKHH36Yfv36sf322zNhwgR69+7NJZdcwj777EP//v3Ze++9mTFjRotjag1aUut8WzNw4MBoyYxyvg7CrPkmTpzI1ltvXXYYpavMZLnOOuuUHcpnKnrPJI3PRrD4FJcgzMyskNsgzMyqcPDBBzN16tTFlv3kJz9h2rRp5QS0DDhBmJlV4e677y47hGXOVUxmZlbICcLMzAo5QZiZWSG3QbRzLR2j3914rblae3a59tQFv61yCcLMrMamT5/OIYccAqTRYg844ICSI6qOE4SZWY11796dO+64o+wwms0JwszarHqZD+KCCy5gp512YuDAgTzxxBMMHTqUzTbbjGHDhi16rr59+35q3+bG9vHHH3PyySfTp08fDjjgAPbff/9FiWf8+PEMGTKE7bffnqFDh7bKMB1ugzCzNm3y5MncfvvtXHvttQwaNGjRfBAjRozgxz/+Mb1792aPPfbguuuuY/bs2QwePJi99tpr0XwQXbp04V//+heHH344laF6nnzySSZMmED37t3ZeeedGTVq1BKH+95oo40YPXo0Z511FkcffTSjRo3igw8+oE+fPpx00klN7leZq6La2O666y6mTZvGs88+yxtvvMHWW2/Nsccey/z58znttNO455576NatG8OHD+e73/0u11133VK9tk4QZtam1cN8EJWpRPv168fcuXPp2rUrXbt2pUuXLsyePbvJ/R544IFmxfboo49y6KGH0qlTJ9Zff3123313AF588UWee+459t57bwAWLlzIBhts0KLXM88JwszatHqYDyL/nI3jWdK+EdGs2Jqq6ooI+vTpw+jRo5cYZ3M5QVib5m689aNeu6Uui/kgllVsu+yyCzfccANHHXUUM2fOZOTIkXz1q19lyy23ZObMmYwePZqddtqJ+fPnM2nSJPr06bNU8bmR2szatWUxH8Syiu0rX/kKPXr0oG/fvpx44onssMMOrL766qywwgrccccdnHfeeQwYMIBtttlmUcP20vB8ELTv+SDa+xl2ez++eub5IMoxd+5cVl11VWbNmsXgwYMZNWoU66+/flX7Nnc+CFcxmZm1IQcccACzZ8/mo48+4sILL6w6ObSEE4SZWRWamg9i6NChyzSOkSNHLrPncoIwsxaLiFYfg6letfX5IFrSnOBGajNrkS5dujBr1qy67b1kn4gIZs2atVhX3mq4BGFmLdKjRw8aGhqYOXNm2aFYFbp06bLo4r9qOUGYWYssv/zy9OrVq+wwrIZcxWRmZoWc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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "normalize.plot.bar(title = \"brands' price and mileage comparision\", \n",
+    "                   color = [\"grey\", \"k\"], rot = 75)\n",
+    "plt.xlabel(\"Brands\")\n",
+    "plt.ylabel(\"density\")\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 129,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "brand       model  \n",
+       "audi        a4         1231\n",
+       "            a3          825\n",
+       "            a6          797\n",
+       "            andere      216\n",
+       "            80          198\n",
+       "                       ... \n",
+       "volkswagen  up           51\n",
+       "            jetta        38\n",
+       "            phaeton      31\n",
+       "            cc           18\n",
+       "            amarok        6\n",
+       "Name: model, Length: 96, dtype: int64"
+      ]
+     },
+     "execution_count": 129,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "brand_model = popular_brands.groupby(\"brand\")[\"model\"].value_counts()\n",
+    "brand_model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 133,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'a4'"
+      ]
+     },
+     "execution_count": 133,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "brand_model[\"audi\"].index[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 135,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c_b = common_brand.index"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 137,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "volkswagen\n",
+      "bmw\n",
+      "opel\n",
+      "mercedes_benz\n",
+      "audi\n",
+      "ford\n"
+     ]
+    }
+   ],
+   "source": [
+    "for i in c_b:\n",
+    "    print(i)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 138,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "b_top_m = {}\n",
+    "\n",
+    "for i in c_b:\n",
+    "    model = brand_model[i].index[0]\n",
+    "    b_top_m[i] = model\n",
+    "    \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 139,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'volkswagen': 'golf',\n",
+       " 'bmw': '3er',\n",
+       " 'opel': 'corsa',\n",
+       " 'mercedes_benz': 'c_klasse',\n",
+       " 'audi': 'a4',\n",
+       " 'ford': 'focus'}"
+      ]
+     },
+     "execution_count": 139,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "b_top_m"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
